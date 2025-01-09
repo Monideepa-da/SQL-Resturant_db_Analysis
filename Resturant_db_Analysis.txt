@@ -1,0 +1,156 @@
+--Resturant_db Analysis--
+--View the the menu_items
+select * from menu_items 
+
+--1.To find the numbers of times in the menu_list--
+
+select count(*) AS number_of_items from public.menu_items
+
+--2.To find the least and most expensive items in the menu list---
+
+select min(price) AS least_expensive,
+       max(price) AS most_expensive
+from public.menu_items
+
+--To explore number of italian dishes---
+
+select category,count(*) as number_of_italian_dishes from public.menu_items 
+group by 1
+Having category = 'Italian'
+
+--To explore most and least expensive italian dishes --
+select min(price),
+       max(price)
+from public.menu_items
+where category = 'Italian'
+
+--To explore number of category and avg price in each category--
+select category,
+       count(*) as no_of_dishes_category,
+	   round(avg(price),2) as average_price
+from public.menu_items
+group by 1
+order by 3
+
+
+--Section 2: Explore the order_table
+
+--View the order_details table
+select * from public.order_details
+
+--date range for the table
+
+select min(order_date),
+       max(order_date)
+from public.order_details 	   
+
+--how many orders were made in the date range
+
+select count(distinct order_id) from public.order_details
+
+--how many items were ordered in this date range
+select count(*) from public.order_details
+
+--order having most number of items
+select order_id,
+       count(item_id) as num_items
+from public.order_details
+group by order_id
+order by num_items DESC
+
+--How many orders have more then 12 items--
+select count(*) from
+ (select order_id,
+       count(item_id) as num_items
+   from public.order_details
+   group by order_id
+   having count(item_id) > 12) as num_orders
+
+--Section3: Combine the menu_items Table and order_details Table
+
+Select *
+from public.order_details od
+LEFT JOIN public.menu_items mi
+    ON od.item_id = mi.menu_item_id 
+
+--most order items and category
+
+select item_name , category,
+	   count(order_details_id) as num_purchase
+from (
+      Select *
+      from public.order_details od
+      LEFT JOIN public.menu_items mi
+        ON od.item_id = mi.menu_item_id 
+      )	
+group by 1,2
+order by 3 desc
+
+
+
+--least order item and category
+select item_name , category,
+	   count(order_details_id) as num_purchase
+from (
+      Select *
+      from public.order_details od
+      LEFT JOIN public.menu_items mi
+        ON od.item_id = mi.menu_item_id 
+      )	
+group by 1,2
+order by 3 asc
+
+--TOP 5 order that spent the most money
+
+Select order_id, sum(PRICE) as total_spent
+      from public.order_details od
+      LEFT JOIN public.menu_items mi
+        ON od.item_id = mi.menu_item_id
+group by 1
+having sum(price) is not null
+order by 2 desc
+limit 5
+
+
+--View details of highest spend orders.What insights can we gather
+
+Select category, count(item_id) as num_items 
+      from public.order_details od
+      LEFT JOIN public.menu_items mi
+        ON od.item_id = mi.menu_item_id
+where order_id =440
+group by 1
+
+--View the details of highes spent order (440, 2075, 1957,2675)--
+
+Select order_id , category, count(item_id) as num_items 
+      from public.order_details od
+      LEFT JOIN public.menu_items mi
+        ON od.item_id = mi.menu_item_id
+where order_id IN (440, 2075, 1957, 2675 )
+group by 1, 2
+	   
+	   
+
+
+	   
+	   
+	   
+	   
+	   
+
+
+   
+	   
+
+
+	   
+    
+
+
+
+
+
+
+
+	   
